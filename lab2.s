@@ -1,73 +1,57 @@
-            TTL Program Title for Listing Header Goes Here
 ;****************************************************************
-;Descriptive comment header goes here.
-;(What does the program do?)
-;Name:  <Your name here>
-;Date:  <Date completed here>
-;Class:  CMPE-250
-;Section:  <Your lab section, day, and time here>
+; TTL Program Title for Listing Header Goes Here
+;****************************************************************
+; Descriptive comment header goes here.
+; (What does the program do?)
+; Name:  <Your name here>
+; Date:  <Date completed here>
+; Class:  CMPE-250
+; Section:  <Your lab section, day, and time here>
 ;---------------------------------------------------------------
-;Keil Simulator Template for KL05
-;R. W. Melton
-;August 21, 2025
+; Keil Simulator Template for KL05
+; R. W. Melton
+; August 21, 2025
 ;****************************************************************
-;Assembler directives
+
+; Assembler directives
             THUMB
-            OPT    64  ;Turn on listing macro expansions
+            OPT    64      ; Turn on listing macro expansions
+
 ;****************************************************************
-;EQUates
-;Standard data masks
+; EQUates
+; Standard data masks
 BYTE_MASK         EQU  0xFF
 NIBBLE_MASK       EQU  0x0F
-;Standard data sizes (in bits)
+; Standard data sizes (in bits)
 BYTE_BITS         EQU  8
 NIBBLE_BITS       EQU  4
-;Architecture data sizes (in bytes)
-WORD_SIZE         EQU  4  ;Cortex-M0+
-HALFWORD_SIZE     EQU  2  ;Cortex-M0+
-;Architecture data masks
+; Architecture data sizes (in bytes)
+WORD_SIZE         EQU  4
+HALFWORD_SIZE     EQU  2
+; Architecture data masks
 HALFWORD_MASK     EQU  0xFFFF
-;Return                 
-RET_ADDR_T_MASK   EQU  1  ;Bit 0 of ret. addr. must be
-                          ;set for BX, BLX, or POP
-                          ;mask in thumb mode
+; Return
+RET_ADDR_T_MASK   EQU  1
+
 ;---------------------------------------------------------------
-;Vectors
-VECTOR_TABLE_SIZE EQU 0x000000C0  ;KL05
-VECTOR_SIZE       EQU 4           ;Bytes per vector
+; Vectors
+VECTOR_TABLE_SIZE EQU 0x000000C0
+VECTOR_SIZE       EQU 4
+
 ;---------------------------------------------------------------
-;CPU CONTROL:  Control register
-;31-2:(reserved)
-;   1:SPSEL=current stack pointer select
-;           0=MSP (main stack pointer) (reset value)
-;           1=PSP (process stack pointer)
-;   0:nPRIV=not privileged
-;        0=privileged (Freescale/NXP "supervisor") (reset value)
-;        1=not privileged (Freescale/NXP "user")
+; CPU CONTROL: Control register
 CONTROL_SPSEL_MASK   EQU  2
 CONTROL_SPSEL_SHIFT  EQU  1
 CONTROL_nPRIV_MASK   EQU  1
 CONTROL_nPRIV_SHIFT  EQU  0
+
 ;---------------------------------------------------------------
-;CPU PRIMASK:  Interrupt mask register
-;31-1:(reserved)
-;   0:PM=prioritizable interrupt mask:
-;        0=all interrupts unmasked (reset value)
-;          (value after CPSIE I instruction)
-;        1=prioritizable interrrupts masked
-;          (value after CPSID I instruction)
+; CPU PRIMASK
 PRIMASK_PM_MASK   EQU  1
 PRIMASK_PM_SHIFT  EQU  0
+
 ;---------------------------------------------------------------
-;CPU PSR:  Program status register
-;Combined APSR, EPSR, and IPSR
-;----------------------------------------------------------
-;CPU APSR:  Application Program Status Register
-;31  :N=negative flag
-;30  :Z=zero flag
-;29  :C=carry flag
-;28  :V=overflow flag
-;27-0:(reserved)
+; CPU PSR Masks
 APSR_MASK     EQU  0xF0000000
 APSR_SHIFT    EQU  28
 APSR_N_MASK   EQU  0x80000000
@@ -78,37 +62,17 @@ APSR_C_MASK   EQU  0x20000000
 APSR_C_SHIFT  EQU  29
 APSR_V_MASK   EQU  0x10000000
 APSR_V_SHIFT  EQU  28
-;----------------------------------------------------------
-;CPU EPSR
-;31-25:(reserved)
-;   24:T=Thumb state bit
-;23- 0:(reserved)
+
 EPSR_MASK     EQU  0x01000000
 EPSR_SHIFT    EQU  24
 EPSR_T_MASK   EQU  0x01000000
 EPSR_T_SHIFT  EQU  24
-;----------------------------------------------------------
-;CPU IPSR
-;31-6:(reserved)
-; 5-0:Exception number=number of current exception
-;      0=thread mode
-;      1:(reserved)
-;      2=NMI
-;      3=hard fault
-;      4-10:(reserved)
-;     11=SVCall
-;     12-13:(reserved)
-;     14=PendSV
-;     15=SysTick
-;     16=IRQ0
-;     16-47:IRQ(Exception number - 16)
-;     47=IRQ31
-;     48-63:(reserved)
+
 IPSR_MASK             EQU  0x0000003F
 IPSR_SHIFT            EQU  0
 IPSR_EXCEPTION_MASK   EQU  0x0000003F
 IPSR_EXCEPTION_SHIFT  EQU  0
-;----------------------------------------------------------
+
 PSR_N_MASK           EQU  APSR_N_MASK
 PSR_N_SHIFT          EQU  APSR_N_SHIFT
 PSR_Z_MASK           EQU  APSR_Z_MASK
@@ -121,35 +85,33 @@ PSR_T_MASK           EQU  EPSR_T_MASK
 PSR_T_SHIFT          EQU  EPSR_T_SHIFT
 PSR_EXCEPTION_MASK   EQU  IPSR_EXCEPTION_MASK
 PSR_EXCEPTION_SHIFT  EQU  IPSR_EXCEPTION_SHIFT
-;----------------------------------------------------------
-;Stack
+
+;---------------------------------------------------------------
+; Stack
 SSTACK_SIZE EQU  0x00000100
+
 ;****************************************************************
-;Program
-;Linker requires Reset_Handler
+; Program
+; Linker requires Reset_Handler
             AREA    MyCode,CODE,READONLY
             ENTRY
             EXPORT  Reset_Handler
-Reset_Handler  PROC {}
-main
-;---------------------------------------------------------------
-;Initialize registers
+
+Reset_Handler  PROC
+            ; Initialize registers
             BL      RegInit
-;>>>>> begin main program code <<<<<
-;>>>>>   end main program code <<<<<
-;Stay here
+            ; Call expression calculator
+            BL      __main
+            ; Stay here indefinitely
             B       .
-            ENDP    ;main
+            ENDP
+
 ;---------------------------------------------------------------
-RegInit     PROC  {}
+RegInit     PROC
 ;********************************************************************
-;Initializes register n to value 0xnnnnnnnn, for n in {0x1-0xC,0xE}.
-;Initializes R0 to 0x05250821.
-;Initializes APSR.NZCV to 2_1111.
+; Initializes registers
 ;********************************************************************
-;Put return on stack
             PUSH    {LR}
-;Initialize registers
             LDR     R1,=0x11111111
             ADDS    R2,R1,R1
             ADDS    R3,R2,R1
@@ -174,43 +136,67 @@ RegInit     PROC  {}
             MSR     APSR,R0
             LDR     R0,=0x05250821
             POP     {PC}
-            ENDP    ;RegInit
-;---------------------------------------------------------------
-;>>>>> begin subroutine code <<<<<
-;>>>>>   end subroutine code <<<<<
-            ALIGN
+            ENDP
+
 ;****************************************************************
-;Vector Table Mapped to Address 0 at Reset
-;Linker requires __Vectors to be exported
+; Expression Calculator
+;****************************************************************
+            AREA    ExpressionCalc, CODE, READONLY
+            EXPORT  __main
+
+DIV4        EQU     2
+MULT2       EQU     1
+
+__main
+        ; Initialize operands
+        MOV     R0, #45
+        MOV     R1, #6
+        MOV     R2, #13
+        MOV     R3, #7
+        MOV     R4, #65
+        MOV     R5, #33
+
+        ; Compute -R2 / DIV4
+        RSBS    R6, R2, #0      ; R6 = -R2
+        ASR     R6, R6, #DIV4   ; R6 = R6 >> DIV4 (arithmetic shift)
+
+        ; Compute R3 * MULT2 + R3
+        LSL     R7, R3, #MULT2  ; R7 = R3 << MULT2
+        ADD     R7, R7, R3      ; R7 = R7 + R3
+
+        ; Compute final expression: R0 + R1 + R6 - R7 - R4 + R5
+        ADD     R0, R0, R1
+        ADD     R0, R0, R6
+        SUB     R0, R0, R7
+        SUB     R0, R0, R4
+        ADD     R0, R0, R5
+
+        ; Infinite loop to hold result
+        B       .
+
+;****************************************************************
+; Vector Table
+;****************************************************************
             AREA    RESET, DATA, READONLY
             EXPORT  __Vectors
             EXPORT  __Vectors_End
             EXPORT  __Vectors_Size
+
 __Vectors 
-                                      ;ARM core vectors
-            DCD    __initial_sp       ;00:end of stack
-            DCD    Reset_Handler      ;reset vector
+            DCD    __initial_sp       ; 00:end of stack
+            DCD    Reset_Handler      ; reset vector
             SPACE  (VECTOR_TABLE_SIZE - (2 * VECTOR_SIZE))
+
 __Vectors_End
 __Vectors_Size  EQU     __Vectors_End - __Vectors
             ALIGN
+
 ;****************************************************************
-;Constants
-            AREA    MyConst,DATA,READONLY
-;>>>>> begin constants here <<<<<
-;>>>>>   end constants here <<<<<
+; System Stack
 ;****************************************************************
             AREA    |.ARM.__at_0x1FFFFC00|,DATA,READWRITE,ALIGN=3
             EXPORT  __initial_sp
-;Allocate system stack
-            IF      :LNOT::DEF:SSTACK_SIZE
-SSTACK_SIZE EQU     0x00000100
-            ENDIF
+
 Stack_Mem   SPACE   SSTACK_SIZE
 __initial_sp
-;****************************************************************
-;Variables
-            AREA    MyData,DATA,READWRITE
-;>>>>> begin variables here <<<<<
-;>>>>>   end variables here <<<<<
             END
