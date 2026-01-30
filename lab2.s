@@ -1,12 +1,11 @@
 ;****************************************************************
 ; TTL Program Title for Listing Header Goes Here
 ;****************************************************************
-; Descriptive comment header goes here.
-; (What does the program do?)
-; Name:  <Your name here>
-; Date:  <Date completed here>
+; Simple Arithmatics Problem in Assembly
+; Name:  Arnav Gawas
+; Date:  01-20-2026
 ; Class:  CMPE-250
-; Section:  <Your lab section, day, and time here>
+; Section:  01, 2:00PM
 ;---------------------------------------------------------------
 ; Keil Simulator Template for KL05
 ; R. W. Melton
@@ -149,27 +148,27 @@ MULT2       EQU     1
 
 __main
         ; Initialize operands
-        MOV     R0, #45
-        MOV     R1, #6
-        MOV     R2, #13
-        MOV     R3, #7
-        MOV     R4, #65
-        MOV     R5, #33
+        MOVS     R0, #45
+        MOVS    R1, #6
+        MOVS     R2, #13
+        MOVS     R3, #7
+        MOVS     R4, #65
+        MOVS     R5, #33
 
         ; Compute -R2 / DIV4
         RSBS    R6, R2, #0      ; R6 = -R2
-        ASR     R6, R6, #DIV4   ; R6 = R6 >> DIV4 (arithmetic shift)
+        ASRS     R6, R6, #DIV4   ; R6 = R6 >> DIV4 (arithmetic shift)
 
         ; Compute R3 * MULT2 + R3
-        LSL     R7, R3, #MULT2  ; R7 = R3 << MULT2
-        ADD     R7, R7, R3      ; R7 = R7 + R3
+        LSLS     R7, R3, #MULT2  ; R7 = R3 << MULT2
+        ADDS     R7, R7, R3      ; R7 = R7 + R3
 
         ; Compute final expression: R0 + R1 + R6 - R7 - R4 + R5
-        ADD     R0, R0, R1
-        ADD     R0, R0, R6
-        SUB     R0, R0, R7
-        SUB     R0, R0, R4
-        ADD     R0, R0, R5
+        ADDS     R0, R0, R1
+        ADDS     R0, R0, R6
+        SUBS     R0, R0, R7
+        SUBS     R0, R0, R4
+        ADDS     R0, R0, R5
 
         ; Infinite loop to hold result
         B       .
