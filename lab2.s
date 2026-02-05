@@ -1,8 +1,8 @@
             TTL Program: Compute F, G, Result
 ;****************************************************************
 ;This program computes:
-;  F = 3P + 2Q - 75
-;  G = 2P - 4Q + 63
+;  F = 3*var_P + 2*var_Q - 75
+;  G = 2*var_P - 4*var_Q + 63
 ;  Result = F + G
 ;It stores all variables in memory and uses constants in ROM.
 ;Name:  <Your name here>
@@ -41,34 +41,34 @@ main
 ;---------------------------------------------------------------
 ;>>>>> begin main program code <<<<<
 
-; Load P and Q
-            LDR     R1,=P
-            LDR     R1,[R1]       ; R1 = P
-            LDR     R2,=Q
-            LDR     R2,[R2]       ; R2 = Q
+; Load var_P and var_Q
+            LDR     R1,=var_P
+            LDR     R1,[R1]       ; R1 = var_P
+            LDR     R2,=var_Q
+            LDR     R2,[R2]       ; R2 = var_Q
 
 ;------------------------
-; Compute F = 3P + 2Q - 75
+; Compute F = 3*var_P + 2*var_Q - 75
             MOV     R3,R1
-            ADD     R3,R3,R1      ; 2P
-            ADD     R3,R3,R1      ; 3P
+            ADD     R3,R3,R1      ; 2*var_P
+            ADD     R3,R3,R1      ; 3*var_P
             MOV     R4,R2
-            ADD     R4,R4,R2      ; 2Q
-            ADD     R3,R3,R4      ; 3P+2Q
+            ADD     R4,R4,R2      ; 2*var_Q
+            ADD     R3,R3,R4      ; 3*var_P + 2*var_Q
             LDR     R5,=Const_F
             LDR     R5,[R5]
-            SUB     R3,R3,R5      ; 3P+2Q-75
+            SUB     R3,R3,R5      ; 3*var_P + 2*var_Q - 75
             LDR     R6,=F
             STR     R3,[R6]
 
 ;------------------------
-; Compute G = 2P - 4Q + 63
+; Compute G = 2*var_P - 4*var_Q + 63
             MOV     R3,R1
-            ADD     R3,R3,R1      ; 2P
+            ADD     R3,R3,R1      ; 2*var_P
             MOV     R4,R2
-            ADD     R4,R4,R2      ; 2Q
-            ADD     R4,R4,R4      ; 4Q
-            SUB     R3,R3,R4      ; 2P-4Q
+            ADD     R4,R4,R2      ; 2*var_Q
+            ADD     R4,R4,R4      ; 4*var_Q
+            SUB     R3,R3,R4      ; 2*var_P - 4*var_Q
             LDR     R5,=Const_G
             LDR     R5,[R5]
             ADD     R3,R3,R5      ; +63
@@ -121,7 +121,7 @@ RegInit     PROC  {}
             MSR     APSR,R0
             LDR     R0,=0x05250821
             POP     {PC}
-            ENDP    ;RegInit
+            ENDP  ;RegInit
 
 ;---------------------------------------------------------------
 ;Vector Table
@@ -153,8 +153,8 @@ __initial_sp
 ;---------------------------------------------------------------
 ;Variables
             AREA    MyData,DATA,READWRITE
-P           DCD 10
-Q           DCD 20
+var_P       DCD 10
+var_Q       DCD 20
 F           DCD 0
 G           DCD 0
 Result      DCD 0
