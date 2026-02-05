@@ -42,64 +42,125 @@ main
             BL      RegInit
 
 ;---------------------------------------------------------------
+;---------------------------------------------------------------
 ;>>>>> begin main program code <<<<<
 
-; Load var_P and var_Q from memory
+; Load var_P and var_Q
             LDR     R1,=var_P
-            LDR     R1,[R1]       ; R1 = var_P
+            LDR     R1,[R1]           ; R1 = P
             LDR     R2,=var_Q
-            LDR     R2,[R2]       ; R2 = var_Q
+            LDR     R2,[R2]           ; R2 = Q
 
-;------------------------
-; Compute F = 3*var_P + 2*var_Q - 75
+;===============================================================
+; Compute F = 3P + 2Q - 75   (byte overflow by comparison)
+;===============================================================
+
             MOV     R3,R1
-            ADD     R3,R3,R1      ; 2*var_P
-            ADD     R3,R3,R1      ; 3*var_P
+            ADD     R3,R3,R1          ; 2P
+            BL      CHECK_BYTE_F
+            ADD     R3,R3,R1          ; 3P
+            BL      CHECK_BYTE_F
 
             MOV     R4,R2
-            ADD     R4,R4,R2      ; 2*var_Q
+            ADD     R4,R4,R2          ; 2Q
+            BL      CHECK_BYTE_F
 
-            ADD     R3,R3,R4      ; 3P + 2Q
+            ADD     R3,R3,R4          ; 3P + 2Q
+            BL      CHECK_BYTE_F
 
             LDR     R5,=Const_F
             LDR     R5,[R5]
-            SUB     R3,R3,R5      ; 3P + 2Q - 75
+            SUB     R3,R3,R5          ; -75
+            BL      CHECK_BYTE_F
 
             LDR     R6,=F
             STR     R3,[R6]
+            B       COMPUTE_G
 
-;------------------------
-; Compute G = 2*var_P - 4*var_Q + 63
-            MOV     R3,R1
-            ADD     R3,R3,R1      ; 2*var_P
+F_OVERFLOW
+            MOVS    R3,#0
+            LDR     R6,=F
+            STR     R3,[R6]
 
-            MOV     R4,R2
-            ADD     R4,R4,R2      ; 2*var_Q
-            ADD     R4,R4,R4      ; 4*var_Q
+;===============================================================
+; Compute G = 2P - 4Q + 63   (MSB arithmetic + V flag)
+;===============================================================
+COMPUTE_G
+            LSLS    R3,R1,#24         ; P -> MSB
+            LSLS    R4,R2,#24         ; Q -> MSB
 
-            SUB     R3,R3,R4      ; 2*var_P - 4*var_Q
+            ADDS    R3,R3,R3          ; 2P
+            BVS     G_OVERFLOW
+
+            ADDS    R4,R4,R4          ; 2Q
+            ADDS    R4,R4,R4          ; 4Q
+            BVS     G_OVERFLOW
+
+            SUBS    R3,R3,R4          ; 2P - 4Q
+            BVS     G_OVERFLOW
 
             LDR     R5,=Const_G
             LDR     R5,[R5]
-            ADD     R3,R3,R5      ; +63
+            LSLS    R5,R5,#24
+            ADDS    R3,R3,R5          ; +63
+            BVS     G_OVERFLOW
 
+            LSRS    R3,R3,#24
+            LDR     R6,=G
+            STR     R3,[R6]
+            B       COMPUTE_RESULT
+
+G_OVERFLOW
+            MOVS    R3,#0
             LDR     R6,=G
             STR     R3,[R6]
 
-;------------------------
-; Compute Result = F + G
+;===============================================================
+; Compute Result = F + G   (byte overflow by comparison)
+;===============================================================
+COMPUTE_RESULT
             LDR     R3,=F
             LDR     R3,[R3]
             LDR     R4,=G
             LDR     R4,[R4]
             ADD     R3,R3,R4
+
+            MOVS    R7,#127
+            CMP     R3,R7
+            BGT     RESULT_OVERFLOW
+            MOVS    R7,#128
+            RSBS    R7,R7,#0          ; -128
+            CMP     R3,R7
+            BLT     RESULT_OVERFLOW
+
+            LDR     R5,=Result
+            STR     R3,[R5]
+            B       DONE
+
+RESULT_OVERFLOW
+            MOVS    R3,#0
             LDR     R5,=Result
             STR     R3,[R5]
 
-; Stay here
-            B .
+DONE
+            B       .
+
+;---------------------------------------------------------------
+; Byte overflow check subroutine for F
+;---------------------------------------------------------------
+CHECK_BYTE_F
+            PUSH    {LR}
+            MOVS    R7,#127
+            CMP     R3,R7
+            BGT     F_OVERFLOW
+            MOVS    R7,#128
+            RSBS    R7,R7,#0          ; -128
+            CMP     R3,R7
+            BLT     F_OVERFLOW
+            POP     {PC}
 
 ;>>>>>   end main program code <<<<<
+
             ENDP
 
 ;---------------------------------------------------------------
@@ -164,10 +225,10 @@ __initial_sp
 ;---------------------------------------------------------------
 ;Variables
             AREA    MyData,DATA,READWRITE
-var_P       DCD 10      ; Change this in debug mode
-var_Q       DCD 20      ; Change this in debug mode
-F           DCD 0
-G           DCD 0
-Result      DCD 0
+var_P       SPACE 4
+var_Q       SPACE 4
+F           SPACE 4
+G           SPACE 4
+Result      SPACE 4
 
             END
