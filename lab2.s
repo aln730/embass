@@ -10,9 +10,11 @@
 ;Class: CMPE-250
 ;Section: <Your lab section, day, time>
 ;****************************************************************
+
 ;Assembler directives
             THUMB
             OPT    64  ;Turn on listing macro expansions
+
 ;****************************************************************
 ;EQUates
 BYTE_MASK         EQU  0xFF
@@ -23,9 +25,10 @@ WORD_SIZE         EQU  4
 HALFWORD_SIZE     EQU  2
 HALFWORD_MASK     EQU  0xFFFF
 RET_ADDR_T_MASK   EQU  1
-VECTOR_TABLE_SIZE EQU 0xC0
-VECTOR_SIZE       EQU 4
-SSTACK_SIZE       EQU 0x100
+VECTOR_TABLE_SIZE EQU  0xC0
+VECTOR_SIZE       EQU  4
+SSTACK_SIZE       EQU  0x100
+
 ;****************************************************************
 ;Program
             AREA    MyCode,CODE,READONLY
@@ -41,7 +44,7 @@ main
 ;---------------------------------------------------------------
 ;>>>>> begin main program code <<<<<
 
-; Load var_P and var_Q
+; Load var_P and var_Q from memory
             LDR     R1,=var_P
             LDR     R1,[R1]       ; R1 = var_P
             LDR     R2,=var_Q
@@ -52,12 +55,16 @@ main
             MOV     R3,R1
             ADD     R3,R3,R1      ; 2*var_P
             ADD     R3,R3,R1      ; 3*var_P
+
             MOV     R4,R2
             ADD     R4,R4,R2      ; 2*var_Q
-            ADD     R3,R3,R4      ; 3*var_P + 2*var_Q
+
+            ADD     R3,R3,R4      ; 3P + 2Q
+
             LDR     R5,=Const_F
             LDR     R5,[R5]
-            SUB     R3,R3,R5      ; 3*var_P + 2*var_Q - 75
+            SUB     R3,R3,R5      ; 3P + 2Q - 75
+
             LDR     R6,=F
             STR     R3,[R6]
 
@@ -65,13 +72,17 @@ main
 ; Compute G = 2*var_P - 4*var_Q + 63
             MOV     R3,R1
             ADD     R3,R3,R1      ; 2*var_P
+
             MOV     R4,R2
             ADD     R4,R4,R2      ; 2*var_Q
             ADD     R4,R4,R4      ; 4*var_Q
+
             SUB     R3,R3,R4      ; 2*var_P - 4*var_Q
+
             LDR     R5,=Const_G
             LDR     R5,[R5]
             ADD     R3,R3,R5      ; +63
+
             LDR     R6,=G
             STR     R3,[R6]
 
@@ -153,8 +164,8 @@ __initial_sp
 ;---------------------------------------------------------------
 ;Variables
             AREA    MyData,DATA,READWRITE
-var_P       DCD 10
-var_Q       DCD 20
+var_P       DCD 10      ; Change this in debug mode
+var_Q       DCD 20      ; Change this in debug mode
 F           DCD 0
 G           DCD 0
 Result      DCD 0
